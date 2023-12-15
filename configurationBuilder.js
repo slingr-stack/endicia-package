@@ -7,7 +7,7 @@
 
 let configurationBuilder = function (config) {
     config.oauth = {
-        id: 'installationInfo-Skeleton-User-'+sys.context.getCurrentUserRecord().id(),
+        id: 'installationInfo-Endicia-User-'+sys.context.getCurrentUserRecord().id(),
         authUrl: "https://example.com/login/oauth/authorize",
         accessTokenUrl: "https://example.com/login/oauth/access_token",
         clientId: config.choice,

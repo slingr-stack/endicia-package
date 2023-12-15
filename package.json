@@ -1,6 +1,6 @@
 {
-    "name": "skeleton",
-    "label": "Skeleton Package",
+    "name": "endicia",
+    "label": "Endicia Package",
     "dependencies": [
         {
             "type": "service",
@@ -9,16 +9,16 @@
             "instanceId": "shared"
         },
         {
-            "type": "package",
-            "name": "oauth",
-            "version": "v1.0.19"
+            "type": "service",
+            "name": "endicia",
+            "version": "v1.0.0"
         }
     ],
     "configurationBuilder": "/configurationBuilder.js",
     "configuration": [
         {
             "name": "SKELETON_API_BASE_URL",
-            "label": "Skeleton Api Url",
+            "label": "Endicia Api Url",
             "type": "label",
             "value": "https://example.com/"
         },
@@ -85,8 +85,8 @@
         },
         {
             "type": "flowStep",
-            "namespace": "apiCallSkeleton",
-            "path": "/flowSteps/apiCallSkeleton"
+            "namespace": "apiCallEndicia",
+            "path": "/flowSteps/apiCallEndicia"
         },
         {
             "type": "flowStep",

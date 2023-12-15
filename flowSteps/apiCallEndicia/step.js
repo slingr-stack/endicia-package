@@ -20,7 +20,7 @@ var httpService = dependencies.http;
  * {number} connectionTimeout, Read timeout interval, in milliseconds.
  * {number} readTimeout, Connect timeout interval, in milliseconds.
  */
-step.apiCallSkeleton = function (inputs) {
+step.apiCallEndicia = function (inputs) {
 
 	var inputsLogic = {
 		headers: inputs.headers || [],
@@ -121,19 +121,19 @@ function setApiUri(options) {
 	var API_URL = config.get("SKELETON_API_BASE_URL");
 	var url = options.path || "";
 	options.url = API_URL + url;
-	sys.logs.debug('[skeleton] Set url: ' + options.path + "->" + options.url);
+	sys.logs.debug('[endicia] Set url: ' + options.path + "->" + options.url);
 	return options;
 }
 
 function setRequestHeaders(options) {
 	var headers = options.headers || {};
 
-	sys.logs.debug('[skeleton] Set header Bearer');
+	sys.logs.debug('[endicia] Set header Bearer');
 	headers = mergeJSON(headers, {"Content-Type": "application/json"});
 	headers = mergeJSON(headers, {"Authorization": "Bearer "+getAccessTokenForAccount()});
 
 	if (headers.Accept === undefined || headers.Accept === null || headers.Accept === "") {
-		sys.logs.debug('[skeleton] Set header accept');
+		sys.logs.debug('[endicia] Set header accept');
 		headers = mergeJSON(headers, {"Accept": "application/json"});
 	}
 
@@ -143,12 +143,12 @@ function setRequestHeaders(options) {
 
 function getAccessTokenForAccount(account) {
 	account = account || "account";
-	sys.logs.info('[skeleton] Getting access token for account: '+account);
-	var installationJson = sys.storage.get('installationInfo-Skeleton---'+account) || {id: null};
+	sys.logs.info('[endicia] Getting access token for account: '+account);
+	var installationJson = sys.storage.get('installationInfo-Endicia---'+account) || {id: null};
 	var token = installationJson.token || null;
 	var expiration = installationJson.expiration || 0;
 	if (!token || expiration < new Date().getTime()) {
-		sys.logs.info('[skeleton] Access token is expired or not found. Getting new token');
+		sys.logs.info('[endicia] Access token is expired or not found. Getting new token');
 		var res = httpService.post(
 			{
 				url: "https://oauth2.googleapis.com/token",
@@ -164,8 +164,8 @@ function getAccessTokenForAccount(account) {
 		var expires_at = res.expires_in;
 		expiration = new Date(new Date(expires_at) - 1 * 60 * 1000).getTime();
 		installationJson = mergeJSON(installationJson, {"token": token, "expiration": expiration});
-		sys.logs.info('[skeleton] Saving new token for account: ' + account);
-		sys.storage.replace('installationInfo-Skeleton---'+account, installationJson);
+		sys.logs.info('[endicia] Saving new token for account: ' + account);
+		sys.storage.replace('installationInfo-Endicia---'+account, installationJson);
 	}
 	return token;
 }

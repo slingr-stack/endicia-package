@@ -1,8 +1,8 @@
 {
-  "label": "API call to skeleton",
+  "label": "API call to endicia",
   "name": "customFlow",
   "category": "integrations",
-  "description": "This flow step will send generic request to skeleton",
+  "description": "This flow step will send generic request to endicia",
   "inputs": [
     {
       "label": "Url",
