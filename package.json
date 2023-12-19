@@ -9,67 +9,80 @@
             "instanceId": "shared"
         },
         {
-            "type": "service",
-            "name": "endicia",
-            "version": "v1.0.0"
+            "type": "package",
+            "name": "oauth",
+            "version": "v1.0.19"
         }
     ],
     "configurationBuilder": "/configurationBuilder.js",
     "configuration": [
         {
-            "name": "SKELETON_API_BASE_URL",
+            "label": "Configuration id",
+            "description": "Id used to store tokens",
+            "name": "id",
+            "type": "text"
+        },
+        {
+            "label": "Auth URL",
+            "name": "authUrl",
+            "type": "text"
+        },
+        {
+            "label": "Access Token URL",
+            "name": "accessTokenUrl",
+            "type": "text"
+        },
+        {
+            "label": "Client Id",
+            "name": "clientId",
+            "type": "text"
+        },
+        {
+            "label": "Client Secret",
+            "name": "clientSecret",
+            "type": "text"
+        },
+        {
+            "label": "Scope",
+            "name": "scope",
+            "type": "text"
+        },
+        {
+            "label": "State",
+            "name": "state",
+            "type": "text"
+        },
+        {
+            "name": "oauthCallback",
+            "label": "OAuth callback",
+            "description": "The OAuth callback to configure in your Endicia App",
+            "type": "label",
+            "value": "config.AUTH_CALLBACK_URL+'/authCallback'"
+        },
+        {
+            "name": "webhooksUrl",
+            "label": "Webhooks URL",
+            "description": "The URL to configure in webhooks of your Endicia App",
+            "type": "label",
+            "value": "@config.WEBHOOK_URL"
+        },
+        {
+            "name": "ENDICIA_API_BASE_URL",
             "label": "Endicia Api Url",
             "type": "label",
-            "value": "https://example.com/"
-        },
-        {
-            "name": "choice",
-            "label": "Choice",
-            "required": false,
-            "defaultValue": "true",
-            "type": "buttonsGroup",
-            "typeOptions": {
-                "allowCustom": true,
-                "possibleValues": [
-                    {
-                        "label": "True",
-                        "name": "true"
-                    },
-                    {
-                        "label": "False",
-                        "name": "false"
-                    },
-                    {
-                        "label": "Other",
-                        "name": "other"
-                    }
-                ]
-            }
-        },
-        {
-            "name": "text",
-            "label": "Text",
-            "type": "text",
-            "required": "false",
-            "visibility": "config.choice == 'true'"
-        },
-        {
-            "name": "info",
-            "label": "info",
-            "type": "label",
-            "value": "'info'"
+            "value": "https://api.stampsendicia.com/sera"
         }
     ],
     "events": [
         {
             "label": "Webhook",
             "name": "webhook",
-            "description": "Event triggered when there is a webhook coming from PandaDoc."
+            "description": "Happens when Endicia sends a webhook to the package."
         },
         {
-            "label": "Callback",
-            "name": "callback",
-            "description": "Happens when a async process is finished"
+            "label": "User connected to endcicia",
+            "name": "userConnected",
+            "description": "Happens when a user successfully connects to endicia ."
         }
     ],
     "metadata": [
@@ -79,19 +92,9 @@
             "path": "/scripts/api.js"
         },
         {
-            "type": "listener",
-            "namespace": "webhook",
-            "path": "/listeners/webhook.js"
-        },
-        {
             "type": "flowStep",
             "namespace": "apiCallEndicia",
             "path": "/flowSteps/apiCallEndicia"
-        },
-        {
-            "type": "flowStep",
-            "namespace": "customFlow",
-            "path": "/flowSteps/customFlow"
         },
         {
             "type": "uiService",

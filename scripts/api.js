@@ -16,8 +16,6 @@ let httpDependency = {
 
 let httpService = {};
 
-let endiciaService = {};
-
 /**
  *
  * Handles a request with retry from the platform side.
@@ -27,11 +25,8 @@ function handleRequestWithRetry(requestFn, options, callbackData, callbacks) {
         return requestFn(options, callbackData, callbacks);
     } catch (error) {
         sys.logs.info("[endicia] Handling request..."+ JSON.stringify(error));
-        // TODO : If you use oauth uncomment this, otherwise delete this comment
-        /*
         dependencies.oauth.functions.refreshToken('endicia:refreshToken');
         return requestFn(setAuthorization(options), callbackData, callbacks);
-        */
     }
 }
 
@@ -44,8 +39,6 @@ function createWrapperFunction(requestFn) {
 for (let key in httpDependency) {
     if (typeof httpDependency[key] === 'function') httpService[key] = createWrapperFunction(httpDependency[key]);
 }
-
-// TODO If use oauth you will need the following two functions, otherwise delete them
 
 /**
  * Retrieves the access token.
@@ -66,47 +59,6 @@ exports.removeAccessToken = function () {
     sys.logs.info("[endicia] Removing access token from oauth");
     return dependencies.oauth.functions.disconnectUser('endicia:disconnectUser');
 }
-
-/****************************************************
- Public API - Dedicated Functions
- ****************************************************/
-
-exports.trackByPicNumber = function (picNumber) {
-    var options = {
-        picNumber: picNumber
-    };
-    return endiciaService._trackByPicNumber(options);
-};
-
-exports.trackByPieceNumber = function (pieceNumber) {
-    var options = {
-        pieceNumber: pieceNumber
-    };
-    return endiciaService._trackByPieceNumber(options);
-};
-
-exports.trackByTransactionId = function (transactionId) {
-    var options = {
-        transactionId: transactionId
-    };
-    return endiciaService._trackByTransactionId(options);
-};
-
-exports.trackByReferenceId = function (referenceId) {
-    var options = {
-        referenceId: referenceId
-    };
-    return endiciaService._trackByReferenceId(options);
-};
-
-exports.transactionListings = function (startDateTime, endDateTime) {
-    var options = {
-        startDateTime: startDateTime,
-        endDateTime: endDateTime
-    };
-    return endiciaService._transactionListings(options);
-};
-
 
 /****************************************************
  Public API - Generic Functions
@@ -309,15 +261,8 @@ let stringType = Function.prototype.call.bind(Object.prototype.toString)
  Configurator
  ****************************************************/
 
-// TODO This is for the uncommon case that you need to execute something when the app is redeployed or in the first call
-// TODO Remove this variable if you don't need it
-
-let init = true;
-
-// TODO Refactor the Endicia function to your package name
 
 let Endicia = function (options) {
-    if (init) { methodOnInit(); init= false; } // TODO Remove this line if you don't use the init variable
     options = options || {};
     options= setApiUri(options);
     options= setAuthorization(options);
@@ -338,46 +283,21 @@ function setApiUri(options) {
 
 function setRequestHeaders(options) {
     let headers = options.headers || {};
-    if (config.get("choice") === "apiKey") { // TODO: Set the authentication method, if needed or remove this if (Remove comments after set the url)
-        sys.logs.debug('[endicia] Set header apikey');
-        headers = mergeJSON(headers, {"Authorization": "API-Key " + config.get("text")});
-    } 
     headers = mergeJSON(headers, {"Content-Type": "application/json"});
-
     options.headers = headers;
     return options;
 }
 
-function setAuthorization(options) { // TODO: Set the authorization method and verify prefix, if needed or remove this function (Remove comments after set the url)
+function setAuthorization(options) {
     sys.logs.debug('[endicia] Setting header token oauth');
     let authorization = options.authorization || {};
     authorization = mergeJSON(authorization, {
         type: "oauth2",
         accessToken: sys.storage.get(config.get("oauth").id + ' - access_token', {decrypt:true}),
-        headerPrefix: "token"
+        headerPrefix: "Bearer"
     });
     options.authorization = authorization;
     return options;
-}
-
-function methodOnInit(){
-    let refreshTokenResponse = httpService.post({
-        url: "https://example.com/",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: {"grant_type":"refresh_token","refresh_token" : config.get("refreshToken")},
-        authorization: {
-            type: "basic",
-            username: config.get("clientId"),
-            password: config.get("clientSecret")
-        }
-    });
-    sys.logs.debug('[endicia] Refresh token response: ' + JSON.stringify(refreshTokenResponse));
-    // If you need to set a variable at application level, you can do it with _config.set (on redeploy its cleared)
-    _config.set("accessToken", refreshTokenResponse.access_token);
-    _config.set("refreshToken", refreshTokenResponse.refresh_token);
 }
 
 function mergeJSON (json1, json2) {

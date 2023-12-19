@@ -7,12 +7,14 @@
 
 let configurationBuilder = function (config) {
     config.oauth = {
-        id: 'installationInfo-Endicia-User-'+sys.context.getCurrentUserRecord().id(),
-        authUrl: "https://example.com/login/oauth/authorize",
-        accessTokenUrl: "https://example.com/login/oauth/access_token",
-        clientId: config.choice,
-        clientSecret: config.text,
-        oauthCallback: config.SKELETON_API_BASE_URL
-    }
+        id: config.id || 'installationInfo-Endicia-User-'+sys.context.getCurrentUserRecord().id(),
+        authUrl: config.authUrl,
+        accessTokenUrl: config.accessTokenUrl,
+        clientId: config.clientId,
+        clientSecret: config.clientSecret,
+        scope: config.scope,
+        state: config.state,
+        oauthCallback: config.oauthCallback
+    };
     return config;
 }
