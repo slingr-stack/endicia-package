@@ -3,10 +3,10 @@
  ****************************************************/
 
 listeners.defaultWebhookEndicia = {
-    label: 'Catch HTTP endicia events',
+    label: 'Catch Endicia events',
     type: 'service',
     options: {
-        service: 'http',
+        service: 'endicia',
         event: 'webhook',
         matching: {
             path: '/endicia',
