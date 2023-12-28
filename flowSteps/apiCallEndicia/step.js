@@ -124,7 +124,7 @@ function stringToObject (obj) {
 
 function setApiUri(options) {
 	let url = options.path || "";
-	options.url = API_URL + url;
+	options.url = config.get("ENDICIA_API_BASE_URL") + url;
 	sys.logs.debug('[endicia] Set url: ' + options.path + "->" + options.url);
 	return options;
 }

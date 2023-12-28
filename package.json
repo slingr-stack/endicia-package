@@ -7,82 +7,84 @@
             "name": "http",
             "version": "v1.3.7",
             "instanceId": "shared"
-        },
-        {
-            "type": "package",
-            "name": "oauth",
-            "version": "v1.0.19"
         }
     ],
-    "configurationBuilder": "/configurationBuilder.js",
     "configuration": [
         {
-            "label": "Configuration id",
-            "description": "Id used to store tokens",
-            "name": "id",
-            "type": "text"
-        },
-        {
-            "label": "Auth URL",
-            "name": "authUrl",
-            "type": "text"
-        },
-        {
-            "label": "Access Token URL",
-            "name": "accessTokenUrl",
-            "type": "text"
-        },
-        {
-            "label": "Client Id",
             "name": "clientId",
-            "type": "text"
+            "label": "Client ID",
+            "type": "text",
+            "required": "true"
         },
         {
-            "label": "Client Secret",
             "name": "clientSecret",
+            "label": "Client secret",
+            "type": "text",
+            "required": "true"
+        },
+        {
+            "name": "codeVerifier",
+            "label": "Code Verifier",
+            "type": "text",
+            "required": "true",
+            "description": "A random 43-128 character used to connect the authorization request to the token request"
+        },
+        {
+            "name": "requestToken",
+            "label": "Request token",
+            "type": "oauth2",
+            "typeOptions": {
+                "clientId": "config.clientId",
+                "clientSecret": "config.clientSecret",
+                "codeVerifier": "config.codeVerifier",
+                "authUrl": "'https://signin.testing.stampsendicia.com/authorize'",
+                "accessTokenUrl": "'https://signin.testing.stampsendicia.com/oauth/token'",
+                "scope": "'offline_access'",
+                "grantType": "'authorization_code'",
+                "accessToken": "@config.accessToken",
+                "refreshToken": "@config.refreshToken"
+            }
+        },
+        {
+            "name": "accessToken",
+            "label": "Access token",
             "type": "text"
         },
         {
-            "label": "Scope",
-            "name": "scope",
+            "name": "refreshToken",
+            "label": "Refresh token",
             "type": "text"
         },
         {
-            "label": "State",
-            "name": "state",
-            "type": "text"
+            "name": "webhook",
+            "label": "Webhook URL",
+            "type": "label",
+            "value": "config.WEBHOOK_URL"
         },
         {
             "name": "oauthCallback",
             "label": "OAuth callback",
             "description": "The OAuth callback to configure in your Endicia App",
             "type": "label",
-            "value": "config.AUTH_CALLBACK_URL+'/authCallback'"
-        },
-        {
-            "name": "webhooksUrl",
-            "label": "Webhooks URL",
-            "description": "The URL to configure in webhooks of your Endicia App",
-            "type": "label",
-            "value": "@config.WEBHOOK_URL"
+            "value": "config.SERVER_URL + '/' + config.ENV + '/runtime/callback'"
         },
         {
             "name": "ENDICIA_API_BASE_URL",
             "label": "Endicia Api Url",
             "type": "label",
-            "value": "https://api.stampsendicia.com/sera"
+            "value": "https://api.testing.stampsendicia.com/sera/v1"
         }
     ],
     "events": [
         {
             "label": "Webhook",
             "name": "webhook",
-            "description": "Happens when Endicia sends a webhook to the package."
+            "description": "Event triggered when there is a webhook coming from Endicia."
         },
         {
-            "label": "User connected to endcicia",
-            "name": "userConnected",
-            "description": "Happens when a user successfully connects to endicia ."
+            "label": "Callback",
+            "name": "callback",
+            "description": "Happens when a async process is finished"
         }
     ],
     "metadata": [
@@ -95,6 +97,11 @@
             "type": "flowStep",
             "namespace": "apiCallEndicia",
             "path": "/flowSteps/apiCallEndicia"
+        },
+        {
+            "type": "listener",
+            "namespace": "listeners",
+            "path": "/listeners/listeners.js"
         },
         {
             "type": "uiService",

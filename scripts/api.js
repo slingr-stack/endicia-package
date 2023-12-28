@@ -25,8 +25,6 @@ function handleRequestWithRetry(requestFn, options, callbackData, callbacks) {
         return requestFn(options, callbackData, callbacks);
     } catch (error) {
         sys.logs.info("[endicia] Handling request..."+ JSON.stringify(error));
-        dependencies.oauth.functions.refreshToken('endicia:refreshToken');
-        return requestFn(setAuthorization(options), callbackData, callbacks);
     }
 }
 
@@ -40,25 +38,6 @@ for (let key in httpDependency) {
     if (typeof httpDependency[key] === 'function') httpService[key] = createWrapperFunction(httpDependency[key]);
 }
 
-/**
- * Retrieves the access token.
- *
- * @return {void} The access token refreshed on the storage.
- */
-exports.getAccessToken = function () {
-    sys.logs.info("[endicia] Getting access token from oauth");
-    return dependencies.oauth.functions.connectUser('endicia:userConnected');
-}
-
-/**
- * Removes the access token from the oauth.
- *
- * @return {void} The access token removed on the storage.
- */
-exports.removeAccessToken = function () {
-    sys.logs.info("[endicia] Removing access token from oauth");
-    return dependencies.oauth.functions.disconnectUser('endicia:disconnectUser');
-}
 
 /****************************************************
  Public API - Generic Functions
@@ -265,10 +244,19 @@ let stringType = Function.prototype.call.bind(Object.prototype.toString)
 let Endicia = function (options) {
     options = options || {};
     options= setApiUri(options);
-    options= setAuthorization(options);
     options= setRequestHeaders(options);
     return options;
 }
+
+exports.utils.verifySignature = function (body, signature) {
+    let secret = config.get("webhooksSharedKey");
+    if (!secret || secret === "" || !sys.utils.crypto.verifySignatureWithHmac(body, signature, secret, "HmacSHA256")) {
+        sys.logs.error("Invalid signature or body");
+        return false;
+    }
+    return true;
+};
+
 
 /****************************************************
  Private API
@@ -276,7 +264,7 @@ let Endicia = function (options) {
 
 function setApiUri(options) {
     let url = options.path || "";
-    options.url = API_URL + url;
+    options.url = config.get("ENDICIA_API_BASE_URL") + url;
     sys.logs.debug('[endicia] Set url: ' + options.path + "->" + options.url);
     return options;
 }
@@ -284,19 +272,8 @@ function setApiUri(options) {
 function setRequestHeaders(options) {
     let headers = options.headers || {};
     headers = mergeJSON(headers, {"Content-Type": "application/json"});
+    headers = mergeJSON(headers, {"Authorization": "Bearer " + config.get("accessToken")});
     options.headers = headers;
-    return options;
-}
-
-function setAuthorization(options) {
-    sys.logs.debug('[endicia] Setting header token oauth');
-    let authorization = options.authorization || {};
-    authorization = mergeJSON(authorization, {
-        type: "oauth2",
-        accessToken: sys.storage.get(config.get("oauth").id + ' - access_token', {decrypt:true}),
-        headerPrefix: "Bearer"
-    });
-    options.authorization = authorization;
     return options;
 }
 
