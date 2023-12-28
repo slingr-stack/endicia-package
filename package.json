@@ -99,11 +99,6 @@
             "path": "/flowSteps/apiCallEndicia"
         },
         {
-            "type": "listener",
-            "namespace": "listeners",
-            "path": "/listeners/listeners.js"
-        },
-        {
             "type": "uiService",
             "namespace": "testUiService",
             "path": "/uiServices/testUiService"
