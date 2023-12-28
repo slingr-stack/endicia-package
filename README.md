@@ -9,7 +9,7 @@
     <tbody>
     <tr>
         <td>Endicia package</td>
-        <td>November 28, 2023</td>
+        <td>December 28, 2023</td>
         <td>Detailed description of the API of the Endicia package.</td>
     </tr>
     </tbody>
@@ -205,7 +205,6 @@ For more information about how shortcuts or flow steps work, and how they are ge
 
 ## Dependencies
 * HTTP Service (Latest Version)
-* Oauth Package (v1.0.19) // TODO review and remove if its needed
 
 ## About SLINGR
 
