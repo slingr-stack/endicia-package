@@ -251,16 +251,6 @@ let Endicia = function (options) {
     return options;
 }
 
-exports.utils.verifySignature = function (body, signature) {
-    let secret = config.get("webhooksSharedKey");
-    if (!secret || secret === "" || !sys.utils.crypto.verifySignatureWithHmac(body, signature, secret, "HmacSHA256")) {
-        sys.logs.error("Invalid signature or body");
-        return false;
-    }
-    return true;
-};
-
-
 /****************************************************
  Private API
  ****************************************************/
@@ -295,7 +285,7 @@ function refreshToken() {
     try {
         sys.logs.info("[endicia] Refresh Token request");
         let refreshTokenResponse = httpService.post({
-            url: "https://signin.testing.stampsendicia.com/oauth/token",
+            url: "https://signin.stampsendicia.com/oauth/token",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/x-www-form-urlencoded"

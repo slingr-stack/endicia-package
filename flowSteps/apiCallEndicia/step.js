@@ -5,6 +5,30 @@
 var httpService = dependencies.http;
 
 /**
+ *
+ * Handles a request with retry from the platform side.
+ */
+function handleRequestWithRetry(requestFn, options, callbackData, callbacks) {
+	try {
+		return requestFn(options, callbackData, callbacks);
+	} catch (error) {
+		sys.logs.info("[endicia] Handling request "+JSON.stringify(error));
+		refreshToken();
+		return requestFn(setAuthorization(options), callbackData, callbacks);
+	}
+}
+
+function createWrapperFunction(requestFn) {
+	return function(options, callbackData, callbacks) {
+		return handleRequestWithRetry(requestFn, options, callbackData, callbacks);
+	};
+}
+
+for (let key in httpDependency) {
+	if (typeof httpDependency[key] === 'function') httpService[key] = createWrapperFunction(httpDependency[key]);
+}
+
+/**
  * This flow step will send generic request.
  *
  * @param {object} inputs
@@ -137,15 +161,46 @@ function setRequestHeaders(options) {
 }
 
 function setAuthorization(options) {
-	sys.logs.debug('[endicia] Setting header token oauth');
 	let authorization = options.authorization || {};
+	sys.logs.debug('[endicia] setting authorization');
 	authorization = mergeJSON(authorization, {
 		type: "oauth2",
-		accessToken: sys.storage.get(config.get("oauth").id + ' - access_token', {decrypt:true}),
+		accessToken: config.get("accessToken"),
 		headerPrefix: "Bearer"
 	});
 	options.authorization = authorization;
 	return options;
+}
+
+function refreshToken() {
+	try {
+		sys.logs.info("[endicia] Refresh Token request");
+		let refreshTokenResponse = httpService.post({
+			url: "https://signin.stampsendicia.com/oauth/token",
+			headers: {
+				"Accept": "application/json",
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+			authorization : {
+				type: "basic",
+				username: config.get("clientId"),
+				password: config.get("clientSecret")
+			},
+			body: {
+				grant_type: "refresh_token",
+				refresh_token: config.get("refreshToken")
+			}
+		});
+		sys.logs.info("[endicia] Refresh Token request response: "+JSON.stringify(refreshTokenResponse));
+		if (response && response.access_token) {
+			_config.set("accessToken", refreshTokenResponse.access_token);
+			_config.set("refreshToken", refreshTokenResponse.refresh_token);
+		} else {
+			sys.logs.error("[endicia] Refresh Token request failed, no access token received.");
+		}
+	} catch (error) {
+		sys.logs.error("[endicia] Error refreshing token: " + error.message);
+	}
 }
 
 function mergeJSON (json1, json2) {
