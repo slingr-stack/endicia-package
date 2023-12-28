@@ -37,8 +37,8 @@
                 "clientId": "config.clientId",
                 "clientSecret": "config.clientSecret",
                 "codeVerifier": "config.codeVerifier",
-                "authUrl": "'https://signin.testing.stampsendicia.com/authorize'",
-                "accessTokenUrl": "'https://signin.testing.stampsendicia.com/oauth/token'",
+                "authUrl": "'https://signin.stampsendicia.com/authorize'",
+                "accessTokenUrl": "'https://signin.stampsendicia.com/oauth/token'",
                 "scope": "'offline_access'",
                 "grantType": "'authorization_code'",
                 "accessToken": "@config.accessToken",
@@ -72,7 +72,7 @@
             "name": "ENDICIA_API_BASE_URL",
             "label": "Endicia Api Url",
             "type": "label",
-            "value": "https://api.testing.stampsendicia.com/sera/v1"
+            "value": "https://api.stampsendicia.com/sera/v1"
         }
     ],
     "events": [

@@ -24,7 +24,9 @@ function handleRequestWithRetry(requestFn, options, callbackData, callbacks) {
     try {
         return requestFn(options, callbackData, callbacks);
     } catch (error) {
-        sys.logs.info("[endicia] Handling request..."+ JSON.stringify(error));
+        sys.logs.info("[endicia] Handling request "+JSON.stringify(error));
+        refreshToken();
+        return requestFn(setAuthorization(options), callbackData, callbacks);
     }
 }
 
@@ -245,6 +247,7 @@ let Endicia = function (options) {
     options = options || {};
     options= setApiUri(options);
     options= setRequestHeaders(options);
+    options= setAuthorization(options);
     return options;
 }
 
@@ -272,9 +275,51 @@ function setApiUri(options) {
 function setRequestHeaders(options) {
     let headers = options.headers || {};
     headers = mergeJSON(headers, {"Content-Type": "application/json"});
-    headers = mergeJSON(headers, {"Authorization": "Bearer " + config.get("accessToken")});
     options.headers = headers;
     return options;
+}
+
+function setAuthorization(options) {
+    let authorization = options.authorization || {};
+    sys.logs.debug('[endicia] setting authorization');
+    authorization = mergeJSON(authorization, {
+        type: "oauth2",
+        accessToken: config.get("accessToken"),
+        headerPrefix: "Bearer"
+    });
+    options.authorization = authorization;
+    return options;
+}
+
+function refreshToken() {
+    try {
+        sys.logs.info("[endicia] Refresh Token request");
+        let refreshTokenResponse = httpService.post({
+            url: "https://signin.testing.stampsendicia.com/oauth/token",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            authorization : {
+                type: "basic",
+                username: config.get("clientId"),
+                password: config.get("clientSecret")
+            },
+            body: {
+                grant_type: "refresh_token",
+                refresh_token: config.get("refreshToken")
+            }
+        });
+        sys.logs.info("[endicia] Refresh Token request response: "+JSON.stringify(refreshTokenResponse));
+        if (response && response.access_token) {
+            _config.set("accessToken", refreshTokenResponse.access_token);
+            _config.set("refreshToken", refreshTokenResponse.refresh_token);
+        } else {
+            sys.logs.error("[endicia] Refresh Token request failed, no access token received.");
+        }
+    } catch (error) {
+        sys.logs.error("[endicia] Error refreshing token: " + error.message);
+    }
 }
 
 function mergeJSON (json1, json2) {
