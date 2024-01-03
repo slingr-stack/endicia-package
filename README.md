@@ -31,6 +31,7 @@ var response = pkg.endicia.api.get('/balance')
 var response = pkg.endicia.api.post('/balance/add-funds', body)
 var response = pkg.endicia.api.put('/account/security_questions', body)
 var response = pkg.endicia.api.delete('/pickups/:pickup_id')
+```
 
 Please take a look at the documentation of the [HTTP service](https://github.com/slingr-stack/http-service)
 for more information about generic requests.
