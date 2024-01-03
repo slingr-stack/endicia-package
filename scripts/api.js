@@ -313,7 +313,7 @@ function refreshToken() {
 }
 
 function mergeJSON (json1, json2) {
-    const result = {};
+    var result = {};
     let key;
     for (key in json1) {
         if(json1.hasOwnProperty(key)) result[key] = json1[key];
@@ -322,21 +322,4 @@ function mergeJSON (json1, json2) {
         if(json2.hasOwnProperty(key)) result[key] = json2[key];
     }
     return result;
-}
-
-/****************************************************
- Extra helper
- ****************************************************/
-
-exports.callbackTest = function () {
-    log('test function arrived UI');
-    sys.ui.sendMessage({
-        scope: 'uiService:testUiService.testUiService',
-        name: 'callbackTest',
-        callbacks: {
-            callbackTest: function (originalMessage, callbackData) {
-                sys.logs.info('callbackTest');
-            }
-        }
-    });
 }

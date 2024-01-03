@@ -204,8 +204,8 @@ function refreshToken() {
 }
 
 function mergeJSON (json1, json2) {
-	const result = {};
-	let key;
+	var result = {};
+	var key;
 	for (key in json1) {
 		if(json1.hasOwnProperty(key)) result[key] = json1[key];
 	}

@@ -97,11 +97,6 @@
             "type": "flowStep",
             "namespace": "apiCallEndicia",
             "path": "/flowSteps/apiCallEndicia"
-        },
-        {
-            "type": "uiService",
-            "namespace": "testUiService",
-            "path": "/uiServices/testUiService"
         }
     ]
 }
