@@ -5,6 +5,30 @@
 var httpService = dependencies.http;
 
 /**
+ *
+ * Handles a request with retry from the platform side.
+ */
+function handleRequestWithRetry(requestFn, options, callbackData, callbacks) {
+	try {
+		return requestFn(options, callbackData, callbacks);
+	} catch (error) {
+		sys.logs.info("[endicia] Handling request "+JSON.stringify(error));
+		refreshToken();
+		return requestFn(setAuthorization(options), callbackData, callbacks);
+	}
+}
+
+function createWrapperFunction(requestFn) {
+	return function(options, callbackData, callbacks) {
+		return handleRequestWithRetry(requestFn, options, callbackData, callbacks);
+	};
+}
+
+for (let key in httpDependency) {
+	if (typeof httpDependency[key] === 'function') httpService[key] = createWrapperFunction(httpDependency[key]);
+}
+
+/**
  * This flow step will send generic request.
  *
  * @param {object} inputs
@@ -20,7 +44,7 @@ var httpService = dependencies.http;
  * {number} connectionTimeout, Read timeout interval, in milliseconds.
  * {number} readTimeout, Connect timeout interval, in milliseconds.
  */
-step.apiCallSkeleton = function (inputs) {
+step.apiCallEndicia = function (inputs) {
 
 	var inputsLogic = {
 		headers: inputs.headers || [],
@@ -59,6 +83,7 @@ step.apiCallSkeleton = function (inputs) {
 
 	options= setApiUri(options);
 	options= setRequestHeaders(options);
+	options= setAuthorization(options);
 
 	switch (inputsLogic.method.toLowerCase()) {
 		case 'get':
@@ -117,81 +142,65 @@ function stringToObject (obj) {
 	return null;
 }
 
+/****************************************************
+ Private API
+ ****************************************************/
+
 function setApiUri(options) {
-	var API_URL = config.get("SKELETON_API_BASE_URL");
-	var url = options.path || "";
-	options.url = API_URL + url;
-	sys.logs.debug('[skeleton] Set url: ' + options.path + "->" + options.url);
+	let url = options.path || "";
+	options.url = config.get("ENDICIA_API_BASE_URL") + url;
+	sys.logs.debug('[endicia] Set url: ' + options.path + "->" + options.url);
 	return options;
 }
 
 function setRequestHeaders(options) {
-	var headers = options.headers || {};
-
-	sys.logs.debug('[skeleton] Set header Bearer');
+	let headers = options.headers || {};
 	headers = mergeJSON(headers, {"Content-Type": "application/json"});
-	headers = mergeJSON(headers, {"Authorization": "Bearer "+getAccessTokenForAccount()});
-
-	if (headers.Accept === undefined || headers.Accept === null || headers.Accept === "") {
-		sys.logs.debug('[skeleton] Set header accept');
-		headers = mergeJSON(headers, {"Accept": "application/json"});
-	}
-
 	options.headers = headers;
 	return options;
 }
 
-function getAccessTokenForAccount(account) {
-	account = account || "account";
-	sys.logs.info('[skeleton] Getting access token for account: '+account);
-	var installationJson = sys.storage.get('installationInfo-Skeleton---'+account) || {id: null};
-	var token = installationJson.token || null;
-	var expiration = installationJson.expiration || 0;
-	if (!token || expiration < new Date().getTime()) {
-		sys.logs.info('[skeleton] Access token is expired or not found. Getting new token');
-		var res = httpService.post(
-			{
-				url: "https://oauth2.googleapis.com/token",
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				},
-				body: {
-					grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-					assertion: getJsonWebToken()
-				}
-			});
-		token = res.access_token;
-		var expires_at = res.expires_in;
-		expiration = new Date(new Date(expires_at) - 1 * 60 * 1000).getTime();
-		installationJson = mergeJSON(installationJson, {"token": token, "expiration": expiration});
-		sys.logs.info('[skeleton] Saving new token for account: ' + account);
-		sys.storage.replace('installationInfo-Skeleton---'+account, installationJson);
-	}
-	return token;
+function setAuthorization(options) {
+	let authorization = options.authorization || {};
+	sys.logs.debug('[endicia] setting authorization');
+	authorization = mergeJSON(authorization, {
+		type: "oauth2",
+		accessToken: config.get("accessToken"),
+		headerPrefix: "Bearer"
+	});
+	options.authorization = authorization;
+	return options;
 }
 
-function getJsonWebToken() {
-	var currentTime = new Date().getTime();
-	var futureTime = new Date(currentTime + ( 10 * 60 * 1000)).getTime();
-	var scopeProp= config.get("scope");
-	var scopes;
-	if (!!scopeProp) {
-		scopes = scopeProp.map(function (s) {
-			return "https://www.googleapis.com/auth/" + s;
+function refreshToken() {
+	try {
+		sys.logs.info("[endicia] Refresh Token request");
+		let refreshTokenResponse = httpService.post({
+			url: "https://signin.stampsendicia.com/oauth/token",
+			headers: {
+				"Accept": "application/json",
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+			authorization : {
+				type: "basic",
+				username: config.get("clientId"),
+				password: config.get("clientSecret")
+			},
+			body: {
+				grant_type: "refresh_token",
+				refresh_token: config.get("refreshToken")
+			}
 		});
+		sys.logs.info("[endicia] Refresh Token request response: "+JSON.stringify(refreshTokenResponse));
+		if (response && response.access_token) {
+			_config.set("accessToken", refreshTokenResponse.access_token);
+			_config.set("refreshToken", refreshTokenResponse.refresh_token);
+		} else {
+			sys.logs.error("[endicia] Refresh Token request failed, no access token received.");
+		}
+	} catch (error) {
+		sys.logs.error("[endicia] Error refreshing token: " + error.message);
 	}
-	var scopesGlobal = scopes.join(" ");
-	return sys.utils.crypto.jwt.generate(
-		{
-			iss: config.get("serviceAccountEmail"),
-			aud: GOOGLEWORKSPACE_API_AUTH_URL,
-			scope: scopesGlobal,
-			iat: currentTime,
-			exp: futureTime
-		},
-		config.get("privateKey"),
-		"RS256"
-	)
 }
 
 function mergeJSON (json1, json2) {
@@ -204,4 +213,21 @@ function mergeJSON (json1, json2) {
 		if(json2.hasOwnProperty(key)) result[key] = json2[key];
 	}
 	return result;
+}
+
+/****************************************************
+ Extra helper
+ ****************************************************/
+
+exports.callbackTest = function () {
+	log('test function arrived UI');
+	sys.ui.sendMessage({
+		scope: 'uiService:testUiService.testUiService',
+		name: 'callbackTest',
+		callbacks: {
+			callbackTest: function (originalMessage, callbackData) {
+				sys.logs.info('callbackTest');
+			}
+		}
+	});
 }

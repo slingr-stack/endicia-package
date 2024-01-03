@@ -24,12 +24,9 @@ function handleRequestWithRetry(requestFn, options, callbackData, callbacks) {
     try {
         return requestFn(options, callbackData, callbacks);
     } catch (error) {
-        sys.logs.info("[skeleton] Handling request..."+ JSON.stringify(error));
-        // TODO : If you use oauth uncomment this, otherwise delete this comment
-        /*
-        dependencies.oauth.functions.refreshToken('skeleton:refreshToken');
+        sys.logs.info("[endicia] Handling request "+JSON.stringify(error));
+        refreshToken();
         return requestFn(setAuthorization(options), callbackData, callbacks);
-        */
     }
 }
 
@@ -43,27 +40,6 @@ for (let key in httpDependency) {
     if (typeof httpDependency[key] === 'function') httpService[key] = createWrapperFunction(httpDependency[key]);
 }
 
-// TODO If use oauth you will need the following two functions, otherwise delete them
-
-/**
- * Retrieves the access token.
- *
- * @return {void} The access token refreshed on the storage.
- */
-exports.getAccessToken = function () {
-    sys.logs.info("[skeleton] Getting access token from oauth");
-    return dependencies.oauth.functions.connectUser('skeleton:userConnected');
-}
-
-/**
- * Removes the access token from the oauth.
- *
- * @return {void} The access token removed on the storage.
- */
-exports.removeAccessToken = function () {
-    sys.logs.info("[skeleton] Removing access token from oauth");
-    return dependencies.oauth.functions.disconnectUser('skeleton:disconnectUser');
-}
 
 /****************************************************
  Public API - Generic Functions
@@ -80,7 +56,7 @@ exports.removeAccessToken = function () {
  */
 exports.get = function(path, httpOptions, callbackData, callbacks) {
     let options = checkHttpOptions(path, httpOptions);
-    return httpService.get(Skeleton(options), callbackData, callbacks);
+    return httpService.get(Endicia(options), callbackData, callbacks);
 };
 
 /**
@@ -94,7 +70,7 @@ exports.get = function(path, httpOptions, callbackData, callbacks) {
  */
 exports.post = function(path, httpOptions, callbackData, callbacks) {
     let options = checkHttpOptions(path, httpOptions);
-    return httpService.post(Skeleton(options), callbackData, callbacks);
+    return httpService.post(Endicia(options), callbackData, callbacks);
 };
 
 /**
@@ -108,7 +84,7 @@ exports.post = function(path, httpOptions, callbackData, callbacks) {
  */
 exports.put = function(path, httpOptions, callbackData, callbacks) {
     let options = checkHttpOptions(path, httpOptions);
-    return httpService.put(Skeleton(options), callbackData, callbacks);
+    return httpService.put(Endicia(options), callbackData, callbacks);
 };
 
 /**
@@ -122,7 +98,7 @@ exports.put = function(path, httpOptions, callbackData, callbacks) {
  */
 exports.patch = function(path, httpOptions, callbackData, callbacks) {
     let options = checkHttpOptions(path, httpOptions);
-    return httpService.patch(Skeleton(options), callbackData, callbacks);
+    return httpService.patch(Endicia(options), callbackData, callbacks);
 };
 
 /**
@@ -136,7 +112,7 @@ exports.patch = function(path, httpOptions, callbackData, callbacks) {
  */
 exports.delete = function(path, httpOptions, callbackData, callbacks) {
     let options = checkHttpOptions(path, httpOptions);
-    return httpService.delete(Skeleton(options), callbackData, callbacks);
+    return httpService.delete(Endicia(options), callbackData, callbacks);
 };
 
 /**
@@ -150,7 +126,7 @@ exports.delete = function(path, httpOptions, callbackData, callbacks) {
  */
 exports.head = function(path, httpOptions, callbackData, callbacks) {
     let options = checkHttpOptions(path, httpOptions);
-    return httpService.head(Skeleton(options), callbackData, callbacks);
+    return httpService.head(Endicia(options), callbackData, callbacks);
 };
 
 /**
@@ -164,7 +140,7 @@ exports.head = function(path, httpOptions, callbackData, callbacks) {
  */
 exports.options = function(path, httpOptions, callbackData, callbacks) {
     let options = checkHttpOptions(path, httpOptions);
-    return httpService.options(Skeleton(options), callbackData, callbacks);
+    return httpService.options(Endicia(options), callbackData, callbacks);
 };
 
 exports.utils = {
@@ -201,10 +177,10 @@ exports.utils = {
      */
     getConfiguration: function (property) {
         if (!property) {
-            sys.logs.debug('[skeleton] Get configuration');
+            sys.logs.debug('[endicia] Get configuration');
             return JSON.stringify(config.get());
         }
-        sys.logs.debug('[skeleton] Get property: '+property);
+        sys.logs.debug('[endicia] Get property: '+property);
         return config.get(property);
     },
 
@@ -266,19 +242,12 @@ let stringType = Function.prototype.call.bind(Object.prototype.toString)
  Configurator
  ****************************************************/
 
-// TODO This is for the uncommon case that you need to execute something when the app is redeployed or in the first call
-// TODO Remove this variable if you don't need it
 
-let init = true;
-
-// TODO Refactor the Skeleton function to your package name
-
-let Skeleton = function (options) {
-    if (init) { methodOnInit(); init= false; } // TODO Remove this line if you don't use the init variable
+let Endicia = function (options) {
     options = options || {};
     options= setApiUri(options);
-    options= setAuthorization(options);
     options= setRequestHeaders(options);
+    options= setAuthorization(options);
     return options;
 }
 
@@ -288,57 +257,63 @@ let Skeleton = function (options) {
 
 function setApiUri(options) {
     let url = options.path || "";
-    options.url = API_URL + url;
-    sys.logs.debug('[skeleton] Set url: ' + options.path + "->" + options.url);
+    options.url = config.get("ENDICIA_API_BASE_URL") + url;
+    sys.logs.debug('[endicia] Set url: ' + options.path + "->" + options.url);
     return options;
 }
 
 function setRequestHeaders(options) {
     let headers = options.headers || {};
-    if (config.get("choice") === "apiKey") { // TODO: Set the authentication method, if needed or remove this if (Remove comments after set the url)
-        sys.logs.debug('[skeleton] Set header apikey');
-        headers = mergeJSON(headers, {"Authorization": "API-Key " + config.get("text")});
-    } 
     headers = mergeJSON(headers, {"Content-Type": "application/json"});
-
     options.headers = headers;
     return options;
 }
 
-function setAuthorization(options) { // TODO: Set the authorization method and verify prefix, if needed or remove this function (Remove comments after set the url)
-    sys.logs.debug('[skeleton] Setting header token oauth');
+function setAuthorization(options) {
     let authorization = options.authorization || {};
+    sys.logs.debug('[endicia] setting authorization');
     authorization = mergeJSON(authorization, {
         type: "oauth2",
-        accessToken: sys.storage.get(config.get("oauth").id + ' - access_token', {decrypt:true}),
-        headerPrefix: "token"
+        accessToken: config.get("accessToken"),
+        headerPrefix: "Bearer"
     });
     options.authorization = authorization;
     return options;
 }
 
-function methodOnInit(){
-    let refreshTokenResponse = httpService.post({
-        url: "https://example.com/",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: {"grant_type":"refresh_token","refresh_token" : config.get("refreshToken")},
-        authorization: {
-            type: "basic",
-            username: config.get("clientId"),
-            password: config.get("clientSecret")
+function refreshToken() {
+    try {
+        sys.logs.info("[endicia] Refresh Token request");
+        let refreshTokenResponse = httpService.post({
+            url: "https://signin.stampsendicia.com/oauth/token",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            authorization : {
+                type: "basic",
+                username: config.get("clientId"),
+                password: config.get("clientSecret")
+            },
+            body: {
+                grant_type: "refresh_token",
+                refresh_token: config.get("refreshToken")
+            }
+        });
+        sys.logs.info("[endicia] Refresh Token request response: "+JSON.stringify(refreshTokenResponse));
+        if (response && response.access_token) {
+            _config.set("accessToken", refreshTokenResponse.access_token);
+            _config.set("refreshToken", refreshTokenResponse.refresh_token);
+        } else {
+            sys.logs.error("[endicia] Refresh Token request failed, no access token received.");
         }
-    });
-    sys.logs.debug('[skeleton] Refresh token response: ' + JSON.stringify(refreshTokenResponse));
-    // If you need to set a variable at application level, you can do it with _config.set (on redeploy its cleared)
-    _config.set("accessToken", refreshTokenResponse.access_token);
-    _config.set("refreshToken", refreshTokenResponse.refresh_token);
+    } catch (error) {
+        sys.logs.error("[endicia] Error refreshing token: " + error.message);
+    }
 }
 
 function mergeJSON (json1, json2) {
-    const result = {};
+    var result = {};
     let key;
     for (key in json1) {
         if(json1.hasOwnProperty(key)) result[key] = json1[key];
@@ -347,21 +322,4 @@ function mergeJSON (json1, json2) {
         if(json2.hasOwnProperty(key)) result[key] = json2[key];
     }
     return result;
-}
-
-/****************************************************
- Extra helper
- ****************************************************/
-
-exports.callbackTest = function () {
-    log('test function arrived UI');
-    sys.ui.sendMessage({
-        scope: 'uiService:testUiService.testUiService',
-        name: 'callbackTest',
-        callbacks: {
-            callbackTest: function (originalMessage, callbackData) {
-                sys.logs.info('callbackTest');
-            }
-        }
-    });
 }

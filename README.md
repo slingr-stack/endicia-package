@@ -8,9 +8,9 @@
     </thead>
     <tbody>
     <tr>
-        <td>Skeleton package</td>
-        <td>November 28, 2023</td>
-        <td>Detailed description of the API of the Skeleton package.</td>
+        <td>Endicia package</td>
+        <td>December 28, 2023</td>
+        <td>Detailed description of the API of the Endicia package.</td>
     </tr>
     </tbody>
 </table>
@@ -19,21 +19,18 @@
 
 # Javascript API
 
-The Javascript API of the skeleton endpoint has two pieces:
+The Javascript API of the endicia endpoint has two pieces:
 
 - **HTTP requests**
 - **Flow steps**
 
 ## HTTP requests
-You can make `GET`,`PUT`,`PATCH`,`DELETE` requests to the [skeleton API](API_URL_HERE) like this:
+You can make `GET`,`PUT`,`PATCH`,`DELETE` requests to the [endicia API](https://developer.stamps.com/rest-api/reference/serav1.html) like this:
 ```javascript
-var response = pkg.skeleton.api.get('/path3')
-var response = pkg.skeleton.api.put('/path1/:testPath', body)
-var response = pkg.skeleton.api.put('/path1/:testPath')
-var response = pkg.skeleton.api.patch('/path2?param2=' + httpOptions.query.param2 + '&param3=' + httpOptions.query.param3 + '', body)
-var response = pkg.skeleton.api.patch('/path2?param2=' + httpOptions.query.param2 + '&param3=' + httpOptions.query.param3 + '')
-var response = pkg.skeleton.api.delete('/path4')
-```
+var response = pkg.endicia.api.get('/balance')
+var response = pkg.endicia.api.post('/balance/add-funds', body)
+var response = pkg.endicia.api.put('/account/security_questions', body)
+var response = pkg.endicia.api.delete('/pickups/:pickup_id')
 
 Please take a look at the documentation of the [HTTP service](https://github.com/slingr-stack/http-service)
 for more information about generic requests.
@@ -204,8 +201,7 @@ Generic flow step for full use of the entire endpoint and its services.
 For more information about how shortcuts or flow steps work, and how they are generated, take a look at the [slingr-helpgen tool](https://github.com/slingr-stack/slingr-helpgen).
 
 ## Dependencies
-* HTTP Service (Latest Version)
-* Oauth Package (v1.0.19) // TODO review and remove if its needed
+* HTTP Service (v1.3.7 Version)
 
 ## About SLINGR
 

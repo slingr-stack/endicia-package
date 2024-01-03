@@ -1,70 +1,85 @@
 {
-    "name": "skeleton",
-    "label": "Skeleton Package",
+    "name": "endicia",
+    "label": "Endicia Package",
     "dependencies": [
         {
             "type": "service",
             "name": "http",
             "version": "v1.3.7",
             "instanceId": "shared"
-        },
-        {
-            "type": "package",
-            "name": "oauth",
-            "version": "v1.0.19"
         }
     ],
-    "configurationBuilder": "/configurationBuilder.js",
     "configuration": [
         {
-            "name": "SKELETON_API_BASE_URL",
-            "label": "Skeleton Api Url",
-            "type": "label",
-            "value": "https://example.com/"
+            "name": "clientId",
+            "label": "Client ID",
+            "type": "text",
+            "required": "true"
         },
         {
-            "name": "choice",
-            "label": "Choice",
-            "required": false,
-            "defaultValue": "true",
-            "type": "buttonsGroup",
+            "name": "clientSecret",
+            "label": "Client secret",
+            "type": "text",
+            "required": "true"
+        },
+        {
+            "name": "codeVerifier",
+            "label": "Code Verifier",
+            "type": "text",
+            "required": "true",
+            "description": "A random 43-128 character used to connect the authorization request to the token request"
+        },
+        {
+            "name": "requestToken",
+            "label": "Request token",
+            "type": "oauth2",
             "typeOptions": {
-                "allowCustom": true,
-                "possibleValues": [
-                    {
-                        "label": "True",
-                        "name": "true"
-                    },
-                    {
-                        "label": "False",
-                        "name": "false"
-                    },
-                    {
-                        "label": "Other",
-                        "name": "other"
-                    }
-                ]
+                "clientId": "config.clientId",
+                "clientSecret": "config.clientSecret",
+                "codeVerifier": "config.codeVerifier",
+                "authUrl": "'https://signin.stampsendicia.com/authorize'",
+                "accessTokenUrl": "'https://signin.stampsendicia.com/oauth/token'",
+                "scope": "'offline_access'",
+                "grantType": "'authorization_code'",
+                "accessToken": "@config.accessToken",
+                "refreshToken": "@config.refreshToken"
             }
         },
         {
-            "name": "text",
-            "label": "Text",
-            "type": "text",
-            "required": "false",
-            "visibility": "config.choice == 'true'"
+            "name": "accessToken",
+            "label": "Access token",
+            "type": "text"
         },
         {
-            "name": "info",
-            "label": "info",
+            "name": "refreshToken",
+            "label": "Refresh token",
+            "type": "text"
+        },
+        {
+            "name": "webhook",
+            "label": "Webhook URL",
             "type": "label",
-            "value": "'info'"
+            "value": "config.WEBHOOK_URL"
+        },
+        {
+            "name": "oauthCallback",
+            "label": "OAuth callback",
+            "description": "The OAuth callback to configure in your Endicia App",
+            "type": "label",
+            "value": "config.SERVER_URL + '/' + config.ENV + '/runtime/callback'"
+        },
+        {
+            "name": "ENDICIA_API_BASE_URL",
+            "label": "Endicia Api Url",
+            "type": "label",
+            "value": "https://api.stampsendicia.com/sera/v1"
         }
     ],
     "events": [
         {
             "label": "Webhook",
             "name": "webhook",
-            "description": "Event triggered when there is a webhook coming from PandaDoc."
+            "description": "Event triggered when there is a webhook coming from Endicia."
         },
         {
             "label": "Callback",
@@ -79,24 +94,9 @@
             "path": "/scripts/api.js"
         },
         {
-            "type": "listener",
-            "namespace": "webhook",
-            "path": "/listeners/webhook.js"
-        },
-        {
             "type": "flowStep",
-            "namespace": "apiCallSkeleton",
-            "path": "/flowSteps/apiCallSkeleton"
-        },
-        {
-            "type": "flowStep",
-            "namespace": "customFlow",
-            "path": "/flowSteps/customFlow"
-        },
-        {
-            "type": "uiService",
-            "namespace": "testUiService",
-            "path": "/uiServices/testUiService"
+            "namespace": "apiCallEndicia",
+            "path": "/flowSteps/apiCallEndicia"
         }
     ]
 }
