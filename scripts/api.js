@@ -216,10 +216,10 @@ function generateSoapRequestBody (idType, value, carrier) {
             }
         }
     }
-    body.StatusRequest.RequestOptions.Carrier = carrier;
+    body.StatusRequest.PackageStatusRequest.RequestOptions.Carrier = carrier;
     let pluralId = idType+"s";
-    body.StatusRequest.RequestOptions[pluralId] = {};
-    body.StatusRequest.RequestOptions[pluralId][idType] = value;
+    body.StatusRequest.PackageStatusRequest.RequestOptions[pluralId] = {};
+    body.StatusRequest.PackageStatusRequest.RequestOptions[pluralId][idType] = value;
     return body;
 }
 
