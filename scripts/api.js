@@ -119,29 +119,38 @@ exports.trackByPicNumber = function (picNumber, carrier) {
     if  (ENDICIA_API_TYPE === "apiRest") {
         throw "Helper unavailable for Stamps/Endicia API REST";
     }
-    return httpService.post(Endicia({path: ''}, "www.envmgr.com/LabelService/StatusRequest"), generateSoapRequestBody("PicNumbers", picNumber, carrier));
+    return httpService.post(Endicia({
+        path: '',
+        body:  generateSoapRequestBody("PicNumbers", picNumber, carrier)
+    }, "www.envmgr.com/LabelService/StatusRequest"));
 };
 
 exports.trackByPieceNumber = function (pieceNumber, carrier) {
     if  (ENDICIA_API_TYPE === "apiRest") {
         throw "Helper unavailable for Stamps/Endicia API REST";
     }
-    return httpService.post(Endicia({path: ''}, "www.envmgr.com/LabelService/StatusRequest"), generateSoapRequestBody("PieceNumbers", pieceNumber, carrier));
-};
+    return httpService.post(Endicia({
+        path: '',
+        body:  generateSoapRequestBody("PieceNumbers", pieceNumber, carrier)
+    }, "www.envmgr.com/LabelService/StatusRequest"));};
 
 exports.trackByTransactionId = function (transactionId, carrier) {
     if  (ENDICIA_API_TYPE === "apiRest") {
         throw "Helper unavailable for Stamps/Endicia API REST";
     }
-    return httpService.post(Endicia({path: ''}, "www.envmgr.com/LabelService/StatusRequest"), generateSoapRequestBody("TransactionIds", transactionId, carrier));
-};
+    return httpService.post(Endicia({
+        path: '',
+        body:  generateSoapRequestBody("TransactionIds", transactionId, carrier)
+    }, "www.envmgr.com/LabelService/StatusRequest"));};
 
 exports.trackByTrackingNumber = function (trackingNumber, carrier) {
     if  (ENDICIA_API_TYPE === "apiRest") {
         return httpService.get('/track/' + trackingNumber);
     }
-    return httpService.post(Endicia({path: ''}, "www.envmgr.com/LabelService/StatusRequest"),  generateSoapRequestBody("TrackingNumbers", trackingNumber, carrier));
-};
+    return httpService.post(Endicia({
+        path: '',
+        body:  generateSoapRequestBody("TrackingNumbers", trackingNumber, carrier)
+    }, "www.envmgr.com/LabelService/StatusRequest"));};
 
 /****************************************************
  Private helpers
