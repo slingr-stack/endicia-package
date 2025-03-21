@@ -179,7 +179,8 @@ function generateRequestID() {
     return `${dateTime}${uid}`;
 }
 
-function generateSoapRequestBody (idType, value, carrier = "USPS") {
+function generateSoapRequestBody (idType, value, carrier) {
+    carrier = carrier || "USPS";
     let body = {
         "StatusRequest": {
             "RequesterID": config.get("requesterId"),
