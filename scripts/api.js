@@ -216,10 +216,10 @@ function generateSoapRequestBody (idType, value, carrier) {
             }
         }
     }
-    body.StatusRequest.PackageStatusRequest.RequestOptions.Carrier = carrier;
     let pluralId = idType+"s";
-    body.StatusRequest.PackageStatusRequest.RequestOptions[pluralId] = {};
-    body.StatusRequest.PackageStatusRequest.RequestOptions[pluralId][idType] = value;
+    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.RequestOptions[pluralId] = {};
+    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.RequestOptions[pluralId][idType] = value;
+    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.RequestOptions.Carrier = carrier;
     return body;
 }
 
