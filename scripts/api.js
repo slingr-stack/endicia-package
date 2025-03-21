@@ -215,7 +215,7 @@ function generateSoapRequestBody (idType, value, carrier) {
                 }
             }
         }
-    }
+    };
     let pluralId = idType+"s";
     body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.RequestOptions[pluralId] = {};
     body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.RequestOptions[pluralId][idType] = value;

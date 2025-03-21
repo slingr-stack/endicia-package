@@ -91,7 +91,7 @@
         },
         {
             "name": "requestToken",
-            "label": "Request token",
+            "label": "Request Token",
             "type": "oauth2",
             "typeOptions": {
                 "clientId": "config.clientId",
@@ -108,13 +108,13 @@
         },
         {
             "name": "accessToken",
-            "label": "Access token",
+            "label": "Access Token",
             "type": "text",
             "visibility": "config.endiciaApi == 'apiRest'"
         },
         {
             "name": "refreshToken",
-            "label": "Refresh token",
+            "label": "Refresh Token",
             "type": "text",
             "visibility": "config.endiciaApi == 'apiRest'"
         },
@@ -141,7 +141,7 @@
         },
         {
             "name": "oauthCallback",
-            "label": "OAuth callback",
+            "label": "OAuth Callback",
             "description": "The OAuth callback to configure in your Endicia App",
             "type": "label",
             "value": "config.SERVER_URL + '/' + config.ENV + '/runtime/callback'",
@@ -149,16 +149,6 @@
         }
     ],
     "events": [
-        {
-            "label": "Webhook",
-            "name": "webhook",
-            "description": "Event triggered when there is a webhook coming from Endicia."
-        },
-        {
-            "label": "Callback",
-            "name": "callback",
-            "description": "Happens when a async process is finished"
-        }
     ],
     "metadata": [
         {
