@@ -121,7 +121,7 @@ exports.trackByPicNumber = function (picNumber, carrier) {
     }
     return httpService.post(Endicia({
         path: '',
-        body:  generateSoapRequestBody("PicNumbers", picNumber, carrier)
+        body:  generateSoapRequestBody("PicNumber", picNumber, carrier)
     }, "www.envmgr.com/LabelService/StatusRequest"));
 };
 
@@ -131,7 +131,7 @@ exports.trackByPieceNumber = function (pieceNumber, carrier) {
     }
     return httpService.post(Endicia({
         path: '',
-        body:  generateSoapRequestBody("PieceNumbers", pieceNumber, carrier)
+        body:  generateSoapRequestBody("PieceNumber", pieceNumber, carrier)
     }, "www.envmgr.com/LabelService/StatusRequest"));};
 
 exports.trackByTransactionId = function (transactionId, carrier) {
@@ -140,17 +140,17 @@ exports.trackByTransactionId = function (transactionId, carrier) {
     }
     return httpService.post(Endicia({
         path: '',
-        body:  generateSoapRequestBody("TransactionIds", transactionId, carrier)
+        body:  generateSoapRequestBody("TransactionId", transactionId, carrier)
     }, "www.envmgr.com/LabelService/StatusRequest"));};
 
-exports.trackByTrackingNumber = function (trackingNumber, carrier) {
+exports.trackByTrackingNumber = function (trackingNumber) {
+    if  (ENDICIA_API_TYPE === "apiSoap") {
+        throw "Helper unavailable for Endicia API SOAP";
+    }
     if  (ENDICIA_API_TYPE === "apiRest") {
         return httpService.get('/track/' + trackingNumber);
     }
-    return httpService.post(Endicia({
-        path: '',
-        body:  generateSoapRequestBody("TrackingNumbers", trackingNumber, carrier)
-    }, "www.envmgr.com/LabelService/StatusRequest"));};
+};
 
 /****************************************************
  Private helpers
@@ -191,20 +191,35 @@ function generateRequestID() {
 function generateSoapRequestBody (idType, value, carrier) {
     carrier = carrier || "USPS";
     let body = {
-        "StatusRequest": {
-            "RequesterID": config.get("requesterId"),
-            "RequestID": generateRequestID(),
-            "CertifiedIntermediary": {
-                "AccountID": config.get("accountNumber"),
-                "PassPhrase": config.get("passphrase")
-            },
-            "RequestOptions": {
-                "PackageStatus": "CURRENT",
-                "Carrier": carrier
+        "soap:Envelope": {
+            "@xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                "@xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+                "@xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
+                "soap:Body": {
+                "StatusRequest": {
+                    "@xmlns": "www.envmgr.com/LabelService",
+                        "PackageStatusRequest": {
+                            "RequesterID": config.get("requesterId"),
+                                "RequestID": generateRequestID(),
+                                "CertifiedIntermediary": {
+                                "AccountID": config.get("accountNumber"),
+                                    "PassPhrase": config.get("passphrase"),
+                            },
+                            "RequestOptions": {
+                                "@CostCenter": "",
+                                "@ReferenceID": "",
+                                "@PackageStatus": "CURRENT",
+                                "@StartingTransactionID": ""
+                            }
+                    }
+                }
             }
         }
-    };
-    body.StatusRequest.RequestOptions[idType] = value;
+    }
+    body.StatusRequest.RequestOptions.Carrier = carrier;
+    let pluralId = idType+"s";
+    body.StatusRequest.RequestOptions[pluralId] = {};
+    body.StatusRequest.RequestOptions[pluralId][idType] = value;
     return body;
 }
 
