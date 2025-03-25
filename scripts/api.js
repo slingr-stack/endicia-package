@@ -217,9 +217,9 @@ function generateSoapRequestBody (idType, value, carrier) {
         }
     };
     let pluralId = idType+"s";
-    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.RequestOptions[pluralId] = {};
-    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.RequestOptions[pluralId][idType] = value;
-    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.RequestOptions.Carrier = carrier;
+    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest[pluralId] = {};
+    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest[pluralId][idType] = value;
+    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.Carrier = carrier;
     return body;
 }
 

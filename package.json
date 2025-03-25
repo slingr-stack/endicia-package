@@ -1,6 +1,6 @@
 {
     "name": "endicia",
-    "label": "Endicia Package",
+    "label": "Endicia",
     "dependencies": [
         {
             "type": "service",
@@ -42,6 +42,10 @@
                     {
                         "label": "Sandbox",
                         "name": "https://elstestserver.endicia.com/LabelService/EwsLabelService.asmx?wsdl"
+                    },
+                    {
+                        "label": "Production",
+                        "name": "https://labelserver.endicia.com/LabelService/EwsLabelService.asmx?wsdl"
                     }
                 ]
             }
@@ -72,14 +76,16 @@
             "label": "Client ID",
             "type": "text",
             "required": "config.endiciaApi == 'apiRest'",
-            "visibility": "config.endiciaApi == 'apiRest'"
+            "visibility": "config.endiciaApi == 'apiRest'",
+            "description": "A unique string for authenticating with the Endicia API."
         },
         {
             "name": "clientSecret",
             "label": "Client secret",
             "type": "text",
             "required": "config.endiciaApi == 'apiRest'",
-            "visibility": "config.endiciaApi == 'apiRest'"
+            "visibility": "config.endiciaApi == 'apiRest'",
+            "description": "A random 43-128 character used to connect the authorization request to the token request"
         },
         {
             "name": "codeVerifier",

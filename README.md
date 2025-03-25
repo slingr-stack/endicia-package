@@ -2,7 +2,7 @@
 
 Repo: [https://github.com/slingr-stack/endicia-package](https://github.com/slingr-stack/endicia-package)
 
-This package allows direct access to the [Endicia SOAP API](https://www.endicia.com/developer/docs/els.html#endicia-label-server-api) and the [Stamps.com/Endicia REST API](https://developer.stamps.com/rest-api/reference/serav1.html).
+This [package](https://platform-docs.slingr.io/dev-reference/data-model-and-logic/packages/) allows direct access to the [Endicia SOAP API](https://www.endicia.com/developer/docs/els.html#endicia-label-server-api) and the [Stamps.com/Endicia REST API](https://developer.stamps.com/rest-api/reference/serav1.html).
 However, it provides shortcuts and helpers for most common use cases.
 
 Some features available in this package are:
@@ -15,11 +15,15 @@ Some features available in this package are:
 
 #### Endicia API
 
+The API you want to use, either the Endicia SOAP API or the Stamps.com/Endicia REST API. This parameter selects which of the two API methods will be used for requests.
+
 **Name**: `endiciaApi`
 **Type**: buttonsGroup
 **Mandatory**: true
 
 #### Endicia Label Server API URL (SOAP)
+
+The URL for the Endicia SOAP API, where requests will be made if you select the "Endicia Label Server API (SOAP)" method.
 
 **Name**: `SOAP_API_BASE_URL`
 **Type**: buttonsGroup
@@ -27,17 +31,23 @@ Some features available in this package are:
 
 #### Stamps.com/Endicia API URL (REST)
 
+The URL for the Stamps.com/Endicia REST API, where requests will be made if you select the "Stamps.com/Endicia API (REST)" method.
+
 **Name**: `REST_API_BASE_URL`
 **Type**: buttonsGroup
 **Mandatory**: true
 
 #### Client ID
 
+The unique client ID for authenticating with the Endicia API. This parameter is provided by Endicia when you register your application or account. Required when using Stamps.com/Endicia REST API.
+
 **Name**: `clientId`
 **Type**: text
 **Mandatory**: true
 
-#### Endicia API
+#### API Token
+
+The API token used to authenticate and authorize requests to the Endicia services. This is a sensitive value provided by Endicia and should be handled securely. Required when using Stamps.com/Endicia REST API.
 
 **Name**: `apiToken`
 **Type**: text
@@ -45,11 +55,15 @@ Some features available in this package are:
 
 #### Client secret
 
+The client secret used alongside the Client ID to authenticate API requests. This parameter is also provided by Endicia and should be kept private. Required when using Stamps.com/Endicia REST API.
+
 **Name**: `clientSecret`
 **Type**: text
 **Mandatory**: true
 
 #### Code Verifier
+
+The "code verifier" used in the OAuth 2.0 authorization flow to ensure the security of the token exchange. This parameter is part of the authorization process and must be generated and used properly. Required when using Stamps.com/Endicia REST API.
 
 **Name**: `codeVerifier`
 **Type**: text
@@ -57,11 +71,15 @@ Some features available in this package are:
 
 #### Request Token
 
+The action to generate the access and refresh tokens. This is required when using Stamps.com/Endicia REST API.
+
 **Name**: `requestToken`
 **Type**: oauth2
 **Mandatory**: true
 
 #### Access Token
+
+The access token obtained after completing the authorization flow. This token is used to make authenticated requests to the Endicia APIs. Required when using Stamps.com/Endicia REST API.
 
 **Name**: `accessToken`
 **Type**: text
@@ -69,11 +87,15 @@ Some features available in this package are:
 
 #### Refresh Token
 
+The refresh token is used to obtain a new access token when the original token expires. This is a necessary parameter to maintain long-term authentication. Required when using Stamps.com/Endicia REST API.
+
 **Name**: `refreshToken`
 **Type**: text
 **Mandatory**: true
 
 #### Account Number
+
+The account number associated with your Endicia account. This number is necessary for identifying your account and making shipping-related requests. Required when using Endicia SOAP API.
 
 **Name**: `accountNumber`
 **Type**: text
@@ -81,11 +103,15 @@ Some features available in this package are:
 
 #### Passphrase
 
+The passphrase used alongside the account number to authenticate shipping and label service requests. This value should be treated as confidential. Required when using Endicia SOAP API.
+
 **Name**: `passphrase`
 **Type**: password
 **Mandatory**: true
 
 #### Requester ID
+
+The requester ID used in the Endicia SOAP API to uniquely identify requests made to the Endicia API. Required when using Endicia SOAP API.
 
 **Name**: `requesterId`
 **Type**: text
@@ -93,10 +119,12 @@ Some features available in this package are:
 
 #### OAuth Callback
 
+The callback URL used in the OAuth 2.0 authentication flow. This URL is used to redirect the user after completing the authorization on the Endicia server.
+
 **Name**: `oauthCallback`
 **Type**: label
 
-# Javascript API
+# JavaScript API
 
 The Javascript API of the Endicia package has two pieces:
 
