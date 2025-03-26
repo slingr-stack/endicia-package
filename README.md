@@ -1,214 +1,208 @@
-<table class="table" style="margin-top: 10px">
-    <thead>
-    <tr>
-        <th>Title</th>
-        <th>Last Updated</th>
-        <th>Summary</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>Endicia package</td>
-        <td>December 28, 2023</td>
-        <td>Detailed description of the API of the Endicia package.</td>
-    </tr>
-    </tbody>
-</table>
-
 # Overview
 
-# Javascript API
+Repo: [https://github.com/slingr-stack/endicia-package](https://github.com/slingr-stack/endicia-package)
 
-The Javascript API of the endicia endpoint has two pieces:
+This [package](https://platform-docs.slingr.io/dev-reference/data-model-and-logic/packages/) allows direct access to the [Endicia SOAP API](https://www.endicia.com/developer/docs/els.html#endicia-label-server-api) and the [Stamps.com/Endicia REST API](https://developer.stamps.com/rest-api/reference/serav1.html).
+However, it provides shortcuts and helpers for most common use cases.
+
+Some features available in this package are:
+
+- Authentication and authorization
+- Direct access to the Endicia SOAP API and Stamps.com/Endicia REST API.
+- Helpers for both APIs.
+
+## Configuration
+
+#### Endicia API
+
+The API you want to use, either the Endicia SOAP API or the Stamps.com/Endicia REST API. This parameter selects which of the two API methods will be used for requests.
+
+**Name**: `endiciaApi`
+**Type**: text
+**Mandatory**: true
+
+#### Endicia Label Server API URL (SOAP)
+
+The URL for the Endicia SOAP API, where requests will be made if you select the "Endicia Label Server API (SOAP)" method.
+
+**Name**: `SOAP_API_BASE_URL`
+**Type**: text
+**Mandatory**: true
+
+#### Stamps.com/Endicia API URL (REST)
+
+The URL for the Stamps.com/Endicia REST API, where requests will be made if you select the "Stamps.com/Endicia API (REST)" method.
+
+**Name**: `REST_API_BASE_URL`
+**Type**: text
+**Mandatory**: true
+
+#### Client ID
+
+The unique client ID for authenticating with the Endicia API. This parameter is provided by Endicia when you register your application or account. Required when using Stamps.com/Endicia REST API.
+
+**Name**: `clientId`
+**Type**: text
+**Mandatory**: true
+
+#### API Token
+
+The API token used to authenticate and authorize requests to the Endicia services. This is a sensitive value provided by Endicia and should be handled securely. Required when using Stamps.com/Endicia REST API.
+
+**Name**: `apiToken`
+**Type**: text
+**Mandatory**: true
+
+#### Client secret
+
+The client secret used alongside the Client ID to authenticate API requests. This parameter is also provided by Endicia and should be kept private. Required when using Stamps.com/Endicia REST API.
+
+**Name**: `clientSecret`
+**Type**: text
+**Mandatory**: true
+
+#### Code Verifier
+
+The "code verifier" used in the OAuth 2.0 authorization flow to ensure the security of the token exchange. This parameter is part of the authorization process and must be generated and used properly. Required when using Stamps.com/Endicia REST API.
+
+**Name**: `codeVerifier`
+**Type**: text
+**Mandatory**: true
+
+#### Request Token
+
+The action to generate the access and refresh tokens. This is required when using Stamps.com/Endicia REST API.
+
+**Name**: `requestToken`
+**Type**: text
+**Mandatory**: true
+
+#### Access Token
+
+The access token obtained after completing the authorization flow. This token is used to make authenticated requests to the Endicia APIs. Required when using Stamps.com/Endicia REST API.
+
+**Name**: `accessToken`
+**Type**: text
+**Mandatory**: true
+
+#### Refresh Token
+
+The refresh token is used to obtain a new access token when the original token expires. This is a necessary parameter to maintain long-term authentication. Required when using Stamps.com/Endicia REST API.
+
+**Name**: `refreshToken`
+**Type**: text
+**Mandatory**: true
+
+#### Account Number
+
+The account number associated with your Endicia account. This number is necessary for identifying your account and making shipping-related requests. Required when using Endicia SOAP API.
+
+**Name**: `accountNumber`
+**Type**: text
+**Mandatory**: true
+
+#### Passphrase
+
+The passphrase used alongside the account number to authenticate shipping and label service requests. This value should be treated as confidential. Required when using Endicia SOAP API.
+
+**Name**: `passphrase`
+**Type**: password
+**Mandatory**: true
+
+#### Requester ID
+
+The requester ID used in the Endicia SOAP API to uniquely identify requests made to the Endicia API. Required when using Endicia SOAP API.
+
+**Name**: `requesterId`
+**Type**: text
+**Mandatory**: true
+
+#### OAuth Callback
+
+The callback URL used in the OAuth 2.0 authentication flow. This URL is used to redirect the user after completing the authorization on the Endicia server.
+
+**Name**: `oauthCallback`
+**Type**: label
+
+# JavaScript API
+
+The Javascript API of the Endicia package has two pieces:
 
 - **HTTP requests**
-- **Flow steps**
+- **Helpers**
 
 ## HTTP requests
-You can make `GET`,`PUT`,`PATCH`,`DELETE` requests to the [endicia API](https://developer.stamps.com/rest-api/reference/serav1.html) like this:
+You can make `GET`,`PUT`,`POST` and `DELETE` requests to the [Stamps.com/Endicia Rest API](https://developer.stamps.com/rest-api/reference/serav1.html) like this:
 ```javascript
 var response = pkg.endicia.api.get('/balance')
 var response = pkg.endicia.api.post('/balance/add-funds', body)
 var response = pkg.endicia.api.put('/account/security_questions', body)
 var response = pkg.endicia.api.delete('/pickups/:pickup_id')
 ```
-
+For [Endicia SOAP API](https://www.endicia.com/developer/docs/els.html#endicia-label-server-api) only `POST`requests to the same endpoint are allowed.
+```javascript
+var response = pkg.endicia.api.post('', {
+    body: {
+        "soap:Envelope": {
+            "@xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            "@xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+            "@xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
+            "soap:Body": {
+                "StatusRequest": {
+                    "@xmlns": "www.envmgr.com/LabelService",
+                    "PackageStatusRequest": {
+                        "RequesterID": 123123,
+                        "RequestID": 1,
+                        "CertifiedIntermediary": {
+                            "AccountID": 123123,
+                            "PassPhrase": "frase",
+                        },
+                        "RequestOptions": {
+                            "@CostCenter": "",
+                            "@ReferenceID": "",
+                            "@PackageStatus": "CURRENT",
+                            "@StartingTransactionID": ""
+                        }
+                    }
+                }
+            }
+        }
+    }}, "www.envmgr.com/LabelService/StatusRequest");
+```
 Please take a look at the documentation of the [HTTP service](https://github.com/slingr-stack/http-service)
 for more information about generic requests.
 
-## Flow Step
+## Helpers
 
-As an alternative option to using scripts, you can make use of Flows and Flow Steps specifically created for the endpoint:
-<details>
-    <summary>Click here to see the Flow Steps</summary>
+These are the helpers for Endicia Soap API:
 
-<br>
+```javascript
+pkg.endicia.api.trackByPieceNumber(":pieceNumber");
+pkg.endicia.api.trackByPicNumber(":picNumber");
+pkg.endicia.api.trackByTransactionId(":transactionId");
+```
 
-### Generic Flow Step
+For Stamps.com/Endicia there is one helper:
 
-Generic flow step for full use of the entire endpoint and its services.
+```javascript
+pkg.endicia.api.trackByTrackingNumber(":trackingNumber");
+```
 
-<h3>Inputs</h3>
-
-<table>
-    <thead>
-    <tr>
-        <th>Label</th>
-        <th>Type</th>
-        <th>Required</th>
-        <th>Default</th>
-        <th>Visibility</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>URL (Method)</td>
-        <td>choice</td>
-        <td>yes</td>
-        <td> - </td>
-        <td>Always</td>
-        <td>
-            This is the http method to be used against the endpoint. <br>
-            Possible values are: <br>
-            <i><strong>GET,PUT,PATCH,DELETE</strong></i>
-        </td>
-    </tr>
-    <tr>
-        <td>URL (Path)</td>
-        <td>choice</td>
-        <td>yes</td>
-        <td> - </td>
-        <td>Always</td>
-        <td>
-            The url to which this endpoint will send the request. This is the exact service to which the http request will be made. <br>
-            Possible values are: <br>
-            <i><strong>/testPath<br>/path3<br>/path1/{testPath}<br>/path2?param2=' + httpOptions.query.param2 + '&param3=' + httpOptions.query.param3 + '<br>/path4<br></strong></i>
-        </td>
-    </tr>
-    <tr>
-        <td>Headers</td>
-        <td>keyValue</td>
-        <td>no</td>
-        <td> - </td>
-        <td>Always</td>
-        <td>
-            Used when you want to have a custom http header for the request.
-        </td>
-    </tr>
-    <tr>
-        <td>Query Params</td>
-        <td>keyValue</td>
-        <td>no</td>
-        <td> - </td>
-        <td>Always</td>
-        <td>
-            Used when you want to have a custom query params for the http call.
-        </td>
-    </tr>
-    <tr>
-        <td>Body</td>
-        <td>json</td>
-        <td>no</td>
-        <td> - </td>
-        <td>Always</td>
-        <td>
-            A payload of data can be sent to the server in the body of the request.
-        </td>
-    </tr>
-    <tr>
-        <td>Override Settings</td>
-        <td>boolean</td>
-        <td>no</td>
-        <td> false </td>
-        <td>Always</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>Follow Redirect</td>
-        <td>boolean</td>
-        <td>no</td>
-        <td> false </td>
-        <td> overrideSettings </td>
-        <td>It Indicates that the resource has to be downloaded into a file instead of returning it in the response.</td>
-    </tr>
-    <tr>
-        <td>Download</td>
-        <td>boolean</td>
-        <td>no</td>
-        <td> false </td>
-        <td> overrideSettings </td>
-        <td>If true, the method won't return until the file has been downloaded, and it will return all the information of the file.</td>
-    </tr>
-    <tr>
-        <td>File name</td>
-        <td>text</td>
-        <td>no</td>
-        <td></td>
-        <td> overrideSettings </td>
-        <td>If provided, the file will be stored with this name. If empty, the file name will be calculated from the URL.</td>
-    </tr>
-    <tr>
-        <td>Full response</td>
-        <td> boolean </td>
-        <td>no</td>
-        <td> false </td>
-        <td> overrideSettings </td>
-        <td>Includes extended information about response</td>
-    </tr>
-    <tr>
-        <td>Connection Timeout</td>
-        <td> number </td>
-        <td>no</td>
-        <td> 5000 </td>
-        <td> overrideSettings </td>
-        <td>Connect a timeout interval in milliseconds (0 = infinity).</td>
-    </tr>
-    <tr>
-        <td>Read Timeout</td>
-        <td> number </td>
-        <td>no</td>
-        <td> 60000 </td>
-        <td> overrideSettings </td>
-        <td>Read a timeout interval in milliseconds (0 = infinity).</td>
-    </tr>
-    </tbody>
-</table>
-
-<h3>Outputs</h3>
-
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>response</td>
-        <td>object</td>
-        <td>
-            Object resulting from the response to the endpoint call.
-        </td>
-    </tr>
-    </tbody>
-</table>
+Note that if you use the helpers of the another API the package will throw an error.
 
 
-</details>
+## Events
 
-For more information about how shortcuts or flow steps work, and how they are generated, take a look at the [slingr-helpgen tool](https://github.com/slingr-stack/slingr-helpgen).
+This package does not generate webhooks for events.
 
 ## Dependencies
-* HTTP Service (v1.3.7 Version)
+* HTTP Service
 
-## About SLINGR
+## About Slingr
 
-SLINGR is a low-code rapid application development platform that accelerates development, with robust architecture for integrations and executing custom workflows and automation.
+Slingr is a low-code rapid application development platform that accelerates development, with robust architecture for integrations and executing custom workflows and automation.
 
-[More info about SLINGR](https://slingr.io)
+[More info about Slingr](https://slingr.io)
 
 ## License
 

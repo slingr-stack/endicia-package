@@ -8,10 +8,7 @@ let httpDependency = {
     get: httpReference.get,
     post: httpReference.post,
     put: httpReference.put,
-    patch: httpReference.patch,
     delete: httpReference.delete,
-    head: httpReference.head,
-    options: httpReference.options
 };
 
 let httpService = {};
@@ -25,8 +22,11 @@ function handleRequestWithRetry(requestFn, options, callbackData, callbacks) {
         return requestFn(options, callbackData, callbacks);
     } catch (error) {
         sys.logs.info("[endicia] Handling request "+JSON.stringify(error));
-        refreshToken();
-        return requestFn(setAuthorization(options), callbackData, callbacks);
+        if (ENDICIA_API_TYPE === "apiRest") {
+            refreshToken();
+            return requestFn(setAuthorization(options), callbackData, callbacks);
+        }
+        return requestFn(options, callbackData, callbacks);
     }
 }
 
@@ -55,6 +55,9 @@ for (let key in httpDependency) {
  * @return {object}             - The response of the GET request.
  */
 exports.get = function(path, httpOptions, callbackData, callbacks) {
+    if (ENDICIA_API_TYPE === "apiSoap") {
+        throw "HTTP method unavailable for Endicia SOAP API";
+    }
     let options = checkHttpOptions(path, httpOptions);
     return httpService.get(Endicia(options), callbackData, callbacks);
 };
@@ -64,13 +67,14 @@ exports.get = function(path, httpOptions, callbackData, callbacks) {
  *
  * @param {string} path         - The path to send the POST request to.
  * @param {object} httpOptions  - The options to be included in the POST request check http-service documentation.
+ * @param {string} soapAction  - The SOAP Action for the request if the Endicia SOAP API is being used.
  * @param {object} callbackData - Additional data to be passed to the callback functions. [optional]
  * @param {object} callbacks    - The callback functions to be called upon completion of the POST request. [optional]
  * @return {object}             - The response of the POST request.
  */
-exports.post = function(path, httpOptions, callbackData, callbacks) {
+exports.post = function(path, httpOptions, soapAction, callbackData, callbacks) {
     let options = checkHttpOptions(path, httpOptions);
-    return httpService.post(Endicia(options), callbackData, callbacks);
+    return httpService.post(Endicia(options, soapAction), callbackData, callbacks);
 };
 
 /**
@@ -83,22 +87,11 @@ exports.post = function(path, httpOptions, callbackData, callbacks) {
  * @return {object}             - The response of the PUT request.
  */
 exports.put = function(path, httpOptions, callbackData, callbacks) {
+    if (ENDICIA_API_TYPE === "apiSoap") {
+        throw "HTTP method unavailable for Endicia SOAP API";
+    }
     let options = checkHttpOptions(path, httpOptions);
     return httpService.put(Endicia(options), callbackData, callbacks);
-};
-
-/**
- * Sends an HTTP PATCH request to the specified URL with the provided HTTP options.
- *
- * @param {string} path         - The path to send the PATCH request to.
- * @param {object} httpOptions  - The options to be included in the PATCH request check http-service documentation.
- * @param {object} callbackData - Additional data to be passed to the callback functions. [optional]
- * @param {object} callbacks    - The callback functions to be called upon completion of the POST request. [optional]
- * @return {object}             - The response of the PATCH request.
- */
-exports.patch = function(path, httpOptions, callbackData, callbacks) {
-    let options = checkHttpOptions(path, httpOptions);
-    return httpService.patch(Endicia(options), callbackData, callbacks);
 };
 
 /**
@@ -111,99 +104,52 @@ exports.patch = function(path, httpOptions, callbackData, callbacks) {
  * @return {object}             - The response of the DELETE request.
  */
 exports.delete = function(path, httpOptions, callbackData, callbacks) {
+    if (ENDICIA_API_TYPE === "apiSoap") {
+        throw "HTTP method unavailable for Endicia SOAP API";
+    }
     let options = checkHttpOptions(path, httpOptions);
     return httpService.delete(Endicia(options), callbackData, callbacks);
 };
 
-/**
- * Sends an HTTP HEAD request to the specified URL with the provided HTTP options.
- *
- * @param {string} path         - The path to send the HEAD request to.
- * @param {object} httpOptions  - The options to be included in the HEAD request check http-service documentation.
- * @param {object} callbackData - Additional data to be passed to the callback functions. [optional]
- * @param {object} callbacks    - The callback functions to be called upon completion of the HEAD request. [optional]
- * @return {object}             - The response of the HEAD request.
- */
-exports.head = function(path, httpOptions, callbackData, callbacks) {
-    let options = checkHttpOptions(path, httpOptions);
-    return httpService.head(Endicia(options), callbackData, callbacks);
+/****************************************************
+ Helpers
+ ****************************************************/
+
+exports.trackByPicNumber = function (picNumber, carrier) {
+    if  (ENDICIA_API_TYPE === "apiRest") {
+        throw "Helper unavailable for Stamps/Endicia API REST";
+    }
+    return httpService.post(Endicia({
+        path: '',
+        body:  generateSoapRequestBody("PicNumber", picNumber, carrier)
+    }, "www.envmgr.com/LabelService/StatusRequest"));
 };
 
-/**
- * Sends an HTTP OPTIONS request to the specified URL with the provided HTTP options.
- *
- * @param {string} path         - The path to send the OPTIONS request to.
- * @param {object} httpOptions  - The options to be included in the OPTIONS request check http-service documentation.
- * @param {object} callbackData - Additional data to be passed to the callback functions. [optional]
- * @param {object} callbacks    - The callback functions to be called upon completion of the OPTIONS request. [optional]
- * @return {object}             - The response of the OPTIONS request.
- */
-exports.options = function(path, httpOptions, callbackData, callbacks) {
-    let options = checkHttpOptions(path, httpOptions);
-    return httpService.options(Endicia(options), callbackData, callbacks);
-};
+exports.trackByPieceNumber = function (pieceNumber, carrier) {
+    if  (ENDICIA_API_TYPE === "apiRest") {
+        throw "Helper unavailable for Stamps/Endicia API REST";
+    }
+    return httpService.post(Endicia({
+        path: '',
+        body:  generateSoapRequestBody("PieceNumber", pieceNumber, carrier)
+    }, "www.envmgr.com/LabelService/StatusRequest"));};
 
-exports.utils = {
+exports.trackByTransactionId = function (transactionId, carrier) {
+    if  (ENDICIA_API_TYPE === "apiRest") {
+        throw "Helper unavailable for Stamps/Endicia API REST";
+    }
+    return httpService.post(Endicia({
+        path: '',
+        body:  generateSoapRequestBody("TransactionId", transactionId, carrier)
+    }, "www.envmgr.com/LabelService/StatusRequest"));};
 
-    /**
-     * Converts a given date to a timestamp.
-     *
-     * @param {number | string} params      - The date to be converted.
-     * @return {object}                     - An object containing the timestamp.
-     */
-    fromDateToTimestamp: function(params) {
-        if (!!params) {
-            return {timestamp: new Date(params).getTime()};
-        }
-        return null;
-    },
-
-    /**
-     * Converts a timestamp to a date object.
-     *
-     * @param {number} timestamp            - The timestamp to convert.
-     * @return {object}                     - The date object representing the timestamp.
-     */
-    fromTimestampToDate: function(timestamp) {
-        return new Date(timestamp);
-    },
-
-    /**
-     * Gets a configuration from the properties.
-     *
-     * @param {string} property             - The name of the property to get.
-     *                                          If it is empty, return the entire configuration object.
-     * @return {string}                     - The value of the property or the whole object as string.
-     */
-    getConfiguration: function (property) {
-        if (!property) {
-            sys.logs.debug('[endicia] Get configuration');
-            return JSON.stringify(config.get());
-        }
-        sys.logs.debug('[endicia] Get property: '+property);
-        return config.get(property);
-    },
-
-    /**
-     * Concatenates a path with a param query and its value.
-     *
-     * @param path                          - The path to concatenate.
-     * @param key                           - The name of the param.
-     * @param value                         - The value of the param.
-     * @returns {string}                    - The concatenated path without coding parameters.
-     */
-    concatQuery: function (path, key, value) {
-        return path + ((!path || path.indexOf('?') < 0) ? '?' : '&') + key + "=" + value;
-    },
-
-    /**
-     * Merges two JSON objects into a single object.
-     *
-     * @param {Object} json1 - The first JSON object to be merged.
-     * @param {Object} json2 - The second JSON object to be merged.
-     * @return {Object} - The merged JSON object.
-     */
-    mergeJSON: mergeJSON,
+exports.trackByTrackingNumber = function (trackingNumber) {
+    if  (ENDICIA_API_TYPE === "apiSoap") {
+        throw "Helper unavailable for Endicia API SOAP";
+    }
+    if  (ENDICIA_API_TYPE === "apiRest") {
+        return httpService.get('/track/' + trackingNumber);
+    }
 };
 
 /****************************************************
@@ -236,18 +182,68 @@ function isObject (obj) {
     return !!obj && stringType(obj) === '[object Object]'
 }
 
+function generateRequestID() {
+    const dateTime = new Date().toISOString().replace(/[-:.]/g, '');
+    const uid = Math.floor(Math.random() * 1000000);
+    return `${dateTime}${uid}`;
+}
+
+function generateSoapRequestBody (idType, value, carrier) {
+    carrier = carrier || "USPS";
+    let body = {
+        "soap:Envelope": {
+            "@xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                "@xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+                "@xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
+                "soap:Body": {
+                "StatusRequest": {
+                    "@xmlns": "www.envmgr.com/LabelService",
+                        "PackageStatusRequest": {
+                            "RequesterID": config.get("requesterId"),
+                                "RequestID": generateRequestID(),
+                                "CertifiedIntermediary": {
+                                "AccountID": config.get("accountNumber"),
+                                    "PassPhrase": config.get("passphrase"),
+                            },
+                            "RequestOptions": {
+                                "@CostCenter": "",
+                                "@ReferenceID": "",
+                                "@PackageStatus": "CURRENT",
+                                "@StartingTransactionID": ""
+                            }
+                    }
+                }
+            }
+        }
+    };
+    let pluralId = idType+"s";
+    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest[pluralId] = {};
+    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest[pluralId][idType] = value;
+    body["soap:Envelope"]["soap:Body"].StatusRequest.PackageStatusRequest.Carrier = carrier;
+    return body;
+}
+
 let stringType = Function.prototype.call.bind(Object.prototype.toString)
+
+/****************************************************
+ Constants
+ ****************************************************/
+
+const ENDICIA_API_TYPE = config.get("endiciaApi");
+
+const ENDICIA_API_BASE_URL = ENDICIA_API_TYPE === "apiSoap" ?  config.get("SOAP_API_BASE_URL") : config.get("REST_API_BASE_URL");
 
 /****************************************************
  Configurator
  ****************************************************/
 
-
-let Endicia = function (options) {
+let Endicia = function (options, soapAction) {
     options = options || {};
-    options= setApiUri(options);
-    options= setRequestHeaders(options);
-    options= setAuthorization(options);
+    options = setApiUri(options);
+    options = setRequestHeaders(options, soapAction);
+    if (ENDICIA_API_TYPE === "apiRest") {
+        options = setAuthorization(options);
+    }
     return options;
 }
 
@@ -257,21 +253,25 @@ let Endicia = function (options) {
 
 function setApiUri(options) {
     let url = options.path || "";
-    options.url = config.get("ENDICIA_API_BASE_URL") + url;
-    sys.logs.debug('[endicia] Set url: ' + options.path + "->" + options.url);
+    options.url = ENDICIA_API_BASE_URL + url;
+    sys.logs.info('[endicia] Set url: ' + options.path + "->" + options.url);
     return options;
 }
 
-function setRequestHeaders(options) {
+function setRequestHeaders(options, soapAction) {
     let headers = options.headers || {};
-    headers = mergeJSON(headers, {"Content-Type": "application/json"});
+    if (ENDICIA_API_TYPE === 'apiSoap') {
+        headers['SOAPAction'] = soapAction;
+        headers = mergeJSON(headers, {"Content-Type": "text/xml"});
+    } else {
+        headers = mergeJSON(headers, {"Content-Type": "application/json"});
+    }
     options.headers = headers;
     return options;
 }
 
 function setAuthorization(options) {
     let authorization = options.authorization || {};
-    sys.logs.debug('[endicia] setting authorization');
     authorization = mergeJSON(authorization, {
         type: "oauth2",
         accessToken: config.get("accessToken"),
