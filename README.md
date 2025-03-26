@@ -74,7 +74,7 @@ The "code verifier" used in the OAuth 2.0 authorization flow to ensure the secur
 The action to generate the access and refresh tokens. This is required when using Stamps.com/Endicia REST API.
 
 **Name**: `requestToken`
-**Type**: oauth2
+**Type**: text
 **Mandatory**: true
 
 #### Access Token
