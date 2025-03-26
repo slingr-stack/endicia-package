@@ -26,7 +26,7 @@ The API you want to use, either the Endicia SOAP API or the Stamps.com/Endicia R
 The URL for the Endicia SOAP API, where requests will be made if you select the "Endicia Label Server API (SOAP)" method.
 
 **Name**: `SOAP_API_BASE_URL`
-**Type**: buttonsGroup
+**Type**: text
 **Mandatory**: true
 
 #### Stamps.com/Endicia API URL (REST)
