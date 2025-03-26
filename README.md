@@ -34,7 +34,7 @@ The URL for the Endicia SOAP API, where requests will be made if you select the 
 The URL for the Stamps.com/Endicia REST API, where requests will be made if you select the "Stamps.com/Endicia API (REST)" method.
 
 **Name**: `REST_API_BASE_URL`
-**Type**: buttonsGroup
+**Type**: text
 **Mandatory**: true
 
 #### Client ID
