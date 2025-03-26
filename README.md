@@ -18,7 +18,7 @@ Some features available in this package are:
 The API you want to use, either the Endicia SOAP API or the Stamps.com/Endicia REST API. This parameter selects which of the two API methods will be used for requests.
 
 **Name**: `endiciaApi`
-**Type**: buttonsGroup
+**Type**: text
 **Mandatory**: true
 
 #### Endicia Label Server API URL (SOAP)
